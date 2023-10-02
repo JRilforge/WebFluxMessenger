@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <style>
+        #messenger {
+            width: 388px;
+            height: 500px;
+            padding: 5px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: rgba(23, 43, 77, .2) 0px 1px 3px,
+                rgba(23, 43, 77, .2) 0px 0px 1px;
+            border-radius: 5px;
+            border: 3px solid #46a049;
+        }
+
+        #messengerMessagingView {
+            width: 100%;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            /*justify-content: flex-end;*/
+            overflow: auto;
+        }
+
+        #messengerControllerView {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 5px 15px;
+        }
+        #messengerControllerView input {
+            flex-grow: 1;
+            padding: 10px 0px;
+            border: 0px;
+            background: transparent;
+            outline: 0px;
+            font-weight: 500;
+            margin: 0 10px 0 0;
+            line-height: 1.15;
+        }
+
+        #messengerSendInput {
+            position: relative;
+            height: 45px;
+            flex-grow: 1;
+            padding: 0px 15px;
+            display: flex;
+            border-radius: 20px;
+            align-items: center;
+            background: #eff1f2;
+        }
+
+        .message-view {
+            position: relative;
+            height: fit-content;
+            padding: 5px 30px 5px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .message-view.my-message {
+            align-items: flex-end;
+        }
+
+        .message-header-view {
+            width: fit-content;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .my-message .message-header-view {
+            flex-direction: row-reverse;
+        }
+
+        .message-sender-view {
+            width: fit-content;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .message-created-date-view {
+            width: fit-content;
+            font-size: 12px;
+            color: gray;
+        }
+
+        .message-content-view {
+            width: fit-content;
+            font-size: 14px;
+        }
+
+        #sendBtn {
+            width: 20px;
+            height: 20px;
+        }
+        .container .row {
+            flex-direction: column;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="row">
+        <div id="title">
+            <h1>WebFlux Messenger</h1>
+        </div>
+
+        <div id="messenger" th:data-mid="${myUserId}" th:data-oid="${otherUserId}">
+            <div id="messengerMessagingView">
+
+            </div>
+            <div id="messengerControllerView">
+                <div id="messengerSendInput">
+                    <input id="sendInput" type="text" placeholder="Input Message">
+                    <span id="sendBtn">
+                        <i id="sendBtnIcon" class="fas fa-paper-plane"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const myUserId = messenger.getAttribute('data-mid');
+    const otherUserId = messenger.getAttribute('data-oid');
+
+    (async function() {
+        const response = await fetch('/messages-between?a=' + myUserId + '&b=' + otherUserId, {
+            method: 'get',
+            headers: {
+                'content-type': 'application/json; charset=UTF-8'
+            }
+        });
+
+        try {
+            const existingMessagesBetweenUs = await response.json();
+
+            let existingMessagesHtml = ''
+
+            for (const message of existingMessagesBetweenUs) {
+                message.mine = message.fromUserId === myUserId
+
+                existingMessagesHtml += generateMessageView(message);
+            }
+
+            messengerMessagingView.innerHTML = existingMessagesHtml;
+
+            // scroll to the bottom
+            messengerMessagingView.scrollTop = messengerMessagingView.scrollHeight;
+        } catch (e) {
+            console.error(e);
+        }
+    })()
+
+    function generateMessageView(msg) {
+        let sender = 'Me';
+
+        if (!msg.mine) {
+            sender = msg.fromUserId;
+        }
+
+        return `
+            <div class="message-view ${msg.mine ? 'my-message' : ''}">
+                <div class="message-header-view">
+                    <div class="message-sender-view">${sender}</div>
+                    <div class="message-created-date-view">${tiffDifference(msg.created)}</div>
+                </div>
+                <div class="message-content-view">${msg.content}</div>
+            </div>
+        `
+    }
+
+    function tiffDifference(previous) {
+        const current = new Date().getTime();
+
+        const msPerMinute = 60 * 1000;
+        const msPerHour = msPerMinute * 60;
+        const msPerDay = msPerHour * 24;
+        const msPerMonth = msPerDay * 30;
+        const msPerYear = msPerDay * 365;
+
+        const elapsed = current - previous;
+
+        if (elapsed < msPerMinute) {
+            return Math.round(elapsed/1000) + ' seconds ago';
+        } else if (elapsed < msPerHour) {
+            return Math.round(elapsed/msPerMinute) + ' minutes ago';
+        } else if (elapsed < msPerDay) {
+            return Math.round(elapsed/msPerHour) + ' hours ago';
+        } else if (elapsed < msPerMonth) {
+            return Math.round(elapsed/msPerDay) + ' days ago';
+        } else if (elapsed < msPerYear) {
+            return Math.round(elapsed/msPerMonth) + ' months ago';
+        }
+
+        return Math.round(elapsed/msPerYear) + ' years ago';
+    }
+
+    sendBtn.addEventListener('click', async function() {
+        const messageContent = sendInput.value;
+
+        if (messageContent) {
+            sendBtnIcon.classList.remove('fa-paper-plane')
+            sendBtnIcon.classList.add('fa-circle-notch', 'fa-spin')
+
+            const response = await fetch("/send-message", {
+                method: 'post',
+                headers: {
+                    'content-type': 'application/json; charset=UTF-8'
+                },
+                body: JSON.stringify({
+                    fromUserId: myUserId,
+                    toUserId: otherUserId,
+                    content: messageContent
+                })
+            });
+
+            try {
+                const persistedMessage = await response.json();
+                persistedMessage.mine = true;
+                messengerMessagingView.innerHTML += generateMessageView(persistedMessage);
+
+                // scroll to the bottom
+                messengerMessagingView.scrollTop = messengerMessagingView.scrollHeight;
+            } catch (e) {
+                console.log(e);
+            }
+
+            sendBtnIcon.classList.add('fa-paper-plane')
+            sendBtnIcon.classList.remove('fa-circle-notch', 'fa-spin')
+        }
+    })
+
+    const sse = new EventSource(`/consume/${myUserId}/messaging-event-stream`);
+    sse.onmessage = function (evt) {
+        const inboundMessage = JSON.parse(evt.data);
+        messengerMessagingView.innerHTML += generateMessageView(inboundMessage);
+
+        // scroll to the bottom
+        messengerMessagingView.scrollTop = messengerMessagingView.scrollHeight;
+    };
+</script>
+
+</body>
+
+</html>

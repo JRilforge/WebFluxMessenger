@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: realtime-messenger
+  webflux:
+    base-path: /
+  data:
+    mongodb:
+      authentication-database: admin
+      uri: mongodb+srv://jrilforge:uYXXQPNVHZmqKtxH@cluster0.kohi7xh.mongodb.net/?retryWrites=true&w=majority
+      database: realtime-messenger
+  thymeleaf:
+    reactive:
+      max-chunk-size: 8192
+logging:
+  level:
+    org:
+      springframework: DEBUG
+#    root: DEBUG
