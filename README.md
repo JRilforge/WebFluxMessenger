@@ -22,6 +22,10 @@ testImplementation 'io.projectreactor:reactor-test'
 implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 ```
 
+#### Example of the WebFlux Messenger UI 
+
+![img_5.png](img_5.png)
+
 ### Datadog Installation
 
 1. Sign up with your Google Account.
@@ -44,6 +48,7 @@ launchctl start com.datadoghq.agent
 ### Datadog Instrumentation
 
 1. Add `-javaagent:/Users/<user>/dd-java-agent.jar` to your VM options.
+2. Add ` -Ddd.service=webmvc-messenger` to your VM arguments to set the service name.
 2. Started the Spring boot, and you'll likely see:
 ```
 [dd.trace 2023-10-09 12:58:33:544 +0100] [dd-task-scheduler] INFO datadog.trace.agent.core.StatusLogger - DATADOG TRACER CONFIGURATION {...
