@@ -1,5 +1,9 @@
 package uk.co.hippodigital.engineering.controller;
 
+import io.opentracing.Span;
+import io.opentracing.log.Fields;
+import io.opentracing.tag.Tags;
+import io.opentracing.util.GlobalTracer;
 import lombok.AllArgsConstructor;
 import org.springframework.data.mongodb.core.ChangeStreamEvent;
 import org.springframework.data.mongodb.core.ChangeStreamOptions;
@@ -8,7 +12,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.reactive.function.server.ServerResponse;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -16,6 +19,7 @@ import uk.co.hippodigital.engineering.domain.UserMessage;
 import uk.co.hippodigital.engineering.dto.MessageDto;
 import uk.co.hippodigital.engineering.dto.MessageRequest;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -55,9 +59,20 @@ public class MessengerApi {
   }
 
   @GetMapping("/messages-between")
-  public Flux<MessageDto> getMessagesBetween(@RequestParam("a") String aUserId, @RequestParam("b") String bUserId) {
+  public Flux<MessageDto> getMessagesBetween(@RequestParam("a") String aUserId, @RequestParam("b") String bUserId) throws Exception {
     if (Objects.equals(aUserId, bUserId)) {
-      return Flux.error(new RuntimeException("'a' can't equal 'b'"));
+      // Manual instrumentation necessary for error tracking
+      // https://docs.datadoghq.com/tracing/trace_collection/custom_instrumentation/java/#set-errors-on-a-span
+
+      var ex = new RuntimeException("'a' can't equal 'b'");
+
+      final Span span = GlobalTracer.get().activeSpan();
+      if (span != null) {
+        span.setTag(Tags.ERROR, true);
+        span.log(Collections.singletonMap(Fields.ERROR_OBJECT, ex));
+      }
+
+      return Flux.error(ex);
     }
 
     var users = List.of(aUserId, bUserId);

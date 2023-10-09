@@ -1,0 +1,29 @@
+{
+  "id": 13274911,
+  "name": "High number of errors in WebFlux Messenger",
+  "type": "error-tracking alert",
+  "query": "error-tracking-traces(\"resource_name:\\\"GET /messages-between\\\"\").rollup(\"count\").by(\"@issue.id\").last(\"5m\") > 5",
+  "message": "High number of errors on [issue](https://app.datadoghq.eu/apm/error-tracking/issue/{{[issue.id].name}}) detected.\n\n{{#is_alert}}\n```\n{{span.error.type}}: {{span.attributes.error.message}}\n```\n{{/is_alert}} @junior.owolabi@hippodigital.co.uk",
+  "tags": [
+    "team:rapid-response",
+    "webflux_error"
+  ],
+  "options": {
+    "thresholds": {
+      "critical": 5,
+      "warning": 3,
+      "critical_recovery": 1,
+      "warning_recovery": 2
+    },
+    "enable_logs_sample": false,
+    "notify_audit": false,
+    "restriction_query": null,
+    "on_missing_data": "default",
+    "include_tags": true,
+    "new_host_delay": 300,
+    "groupby_simple_monitor": false,
+    "silenced": {}
+  },
+  "priority": 1,
+  "restricted_roles": null
+}
