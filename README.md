@@ -54,6 +54,36 @@ launchctl start com.datadoghq.agent
 [dd.trace 2023-10-09 12:58:33:544 +0100] [dd-task-scheduler] INFO datadog.trace.agent.core.StatusLogger - DATADOG TRACER CONFIGURATION {...
 ```
 
+### Website Datadog Session Replay
+
+1. Add the following script to the webpages you want to record (user interactions):
+
+```javascript
+<script src="https://www.datadoghq-browser-agent.com/eu1/v4/datadog-rum.js" type="text/javascript"></script>
+<script>
+    window.DD_RUM && window.DD_RUM.init({
+        // Go to https://app.datadoghq.eu/organization-settings/client-tokens to setup your client token
+        clientToken: '<Generated Client Token>',
+        // Go to https://app.datadoghq.eu/organization-settings/application-keys to setup your application id
+        applicationId: '<Generated Application Id>',
+        site: 'datadoghq.eu',
+        service: 'webflux-messenger',
+        env: 'test',
+        // Specify a version number to identify the deployed version of your application in Datadog
+        // version: '1.0.0',
+        sessionSampleRate: 100,
+        sessionReplaySampleRate: 20,
+        trackUserInteractions: true,
+        trackResources: true,
+        trackLongTasks: true,
+        defaultPrivacyLevel: 'mask-user-input',
+    });
+
+    window.DD_RUM &&
+    window.DD_RUM.startSessionReplayRecording();
+</script>
+```
+
 ### Datadog Error Tracking
 
 1. Added dependency to enable error tracking
