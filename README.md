@@ -83,6 +83,10 @@ launchctl start com.datadoghq.agent
     window.DD_RUM.startSessionReplayRecording();
 </script>
 ```
+2. Once at least one session has been recorded visit [here](https://app.datadoghq.eu/rum/performance-monitoring) to analyse the data and start a session replay
+3. Finally, replay a session
+
+![img_4.png](img_4.png)
 
 ### Datadog Error Tracking
 
