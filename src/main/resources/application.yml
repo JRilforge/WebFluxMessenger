@@ -6,7 +6,7 @@ spring:
   data:
     mongodb:
       authentication-database: admin
-      uri: mongodb+srv://jrilforge:uYXXQPNVHZmqKtxH@cluster0.kohi7xh.mongodb.net/?retryWrites=true&w=majority
+      uri: mongodb+srv://${ATLAS_USER}:${ATLAS_PASS}@cluster0.kohi7xh.mongodb.net/?retryWrites=true&w=majority
       database: realtime-messenger
   thymeleaf:
     reactive:
